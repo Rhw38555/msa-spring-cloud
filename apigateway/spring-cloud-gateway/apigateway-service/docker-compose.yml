@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  apigateway-service:
+    hostname: apigateway-service
+    image: rhw/apigateway-service:1.0
+    ports:
+      - 8000:8000
+    env_file: .env
+    environment:
+      TZ: Asia/Seoul
+    networks:
+      - ecommerce-network
+    restart: always
+networks:
+  ecommerce-network:
+    external:
+      name: ecommerce-network

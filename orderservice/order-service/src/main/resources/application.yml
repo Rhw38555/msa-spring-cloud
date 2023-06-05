@@ -1,0 +1,43 @@
+server:
+  port: 0 # ?? ??
+
+spring:
+  application:
+    name: order-service
+  zipkin:
+    base-url: http://127.0.0.1:9411
+    enabled: true
+  sleuth:
+    sampler:
+      probability: 1.0
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    generate-ddl: true
+  h2:
+    console:
+      enabled: true # console ??
+      settings:
+        web-allow-others: true # ?? ?? ??
+      path: /h2-console
+eureka:
+  instance:
+    instance-id: order-service
+    hostname: order-service
+#    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}} # random port value
+  client:
+    register-with-eureka: true # ????
+    fetch-registry: true # ??? ??? ???? ??? ????? ????.
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka
+logging:
+  level:
+    com.example.orderservice: DEBUG
+
+management:
+  endpoint:
+  endpoints:
+    web:
+      exposure:
+        include: health, httprace, info, metrics, prometheus

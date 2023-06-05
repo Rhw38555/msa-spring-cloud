@@ -1,0 +1,117 @@
+server:
+  port: 8000
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+#      defaultZone: http://discovery-service:8761/eureka
+  instance:
+    instance-id: apigateway-service
+spring:
+  application:
+    name: apigateway-service
+  rabbitmq:
+    host: 127.0.0.1
+#    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+  cloud:
+    client:
+      hostname: apigateway-service
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      default-filters:
+        - name: GlobalFilter
+          args:
+            baseMessage: Spring CLoud Gateway GlobalFilter
+            preLogger: true
+            postLogger: true
+      routes:
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/**
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/actuator/**
+            - Method=GET,POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment} # ???? ??? ? url, ?? ??(? ?? ?? ??)
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/loginService
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie # post ??? ??? ??? ??
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment} # ???? ??? ? url, ?? ??(? ?? ?? ??)
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/users
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie # post ??? ??? ??? ??
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment} # ???? ??? ? url, ?? ??(? ?? ?? ??)
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/**
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie # post ??? ??? ??? ??
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment} # ???? ??? ? url, ?? ??(? ?? ?? ??)
+            - AuthorizationHeaderFilter
+        - id: catalog-service
+          uri: lb://CATALOG-SERVICE
+          predicates:
+            - Path=/catalog-service/**
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order-service/**
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order-service/actuator/**
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/order-service/(?<segment>.*), /$\{segment} # ???? ??? ? url, ?? ??(? ?? ?? ??)
+        - id: first-service
+          uri: lb://MY-FIRST-SERVICE
+#          uri: http://localhost:8081/
+          predicates:
+            - Path=/first-service/**
+          filters:
+            - CustomFilter
+#            - AddRequestHeader=first-request, first-request-header2
+#            - AddResponseHeader=first-response, first-response-header2
+        - id: second-service
+          uri: lb://MY-SECOND-SERVICE
+#          uri: http://localhost:8082/
+          predicates:
+            - Path=/second-service/** # ??? ??? ??? localhost:8082/second-service/**
+          filters:
+            - name: CustomFilter
+            - name: LoggerFilter
+              args:
+                baseMessage: Spring CLoud Gateway GlobalFilter
+                preLogger: true
+                postLogger: true
+#            - AddRequestHeader=second-request, second-request-header2
+#            - AddResponseHeader=second-response, second-response-header2
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, beans, httptrace, busrefresh, info, metrics, prometheus # httptrace ?????? ??? ???? ?? ????? ???? ??? ??? ??

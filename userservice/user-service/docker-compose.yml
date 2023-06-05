@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  user-service-mariadb:
+    image: mariadb:10
+    volumes:
+      - ./db/conf.d:/etc/mysql/conf.d
+      - ./db/data:/var/lib/mysql
+      - ./db/initdb.d:/docker-entrypoint-initdb.d
+    env_file: .env
+    environment:
+      TZ: Asia/Seoul
+    networks:
+      - ecommerce-network
+    restart: always
+  user-service:
+    image: rhw/user-service:1.0
+    env_file: .env
+    environment:
+      TZ: Asia/Seoul
+    depends_on:
+      - user-service-mariadb
+    networks:
+      - ecommerce-network
+    restart: always
+networks:
+  ecommerce-network:
+    external:
+      name: ecommerce-network
